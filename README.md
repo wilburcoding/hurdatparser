@@ -6,7 +6,7 @@ This package can be installed using a simple `npm install` command
 ```
 npm install hurdatparser
 ```
-## [Documentation](https://github.com/wilburcoding/hurdat2parser/tree/main/docs)
+## [Documentation](https://github.com/wilburcoding/hurdatparser/tree/main/docs)
 
 # Contributing
 You can contribute to this package by creating pull requests.
