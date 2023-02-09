@@ -1,5 +1,7 @@
 # Documentation for the Hurdat class
 
+Main class for parsing data, contains various methods for searching for storms
+
 ## Properties
 
 `storms` - List of Storm objects parsed
