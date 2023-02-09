@@ -1,0 +1,28 @@
+{
+  "name": "hurdatparser",
+  "version": "0.0.1",
+  "description": "A simple, ultra lightweight parser for Hurdat2 data from the National Hurricane Center (NHC)",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "ava "
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "Wilbur Wei",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^18.0.6",
+    "node-fetch": "^3.2.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wilburcoding/hurdatparser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wilburcoding/hurdatparser/issues"
+  },
+  "homepage": "https://github.com/wilburcoding/hurdatparser#readme",
+  "devDependencies": {
+    "ava": "^5.2.0"
+  }
+}
