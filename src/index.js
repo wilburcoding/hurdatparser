@@ -32,7 +32,7 @@ class Hurdat {
     var stormdata = []
     var stormheader = ""
     for (var item of raw) {
-      if (item.substring(0, 2) == "AL") {
+      if (item.substring(0, 2) == "AL" || item.substring(0,2)=="EP" || item.substring(0,2)=="CP") {
         //
         if (stormheader != "") {
           self.storms.push(new Storm(stormheader, stormdata))
@@ -274,7 +274,7 @@ class Entry {
 class Util {
   constructor() { }
   download(filename,source) {
-    if (source=="natl") {
+    if (source==="natl") {
     axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2021-100522.txt').then(function(response) {
       const text = response.data;
 
@@ -284,7 +284,7 @@ class Util {
         }
       });
     });
-    } else if (source=="pac") {
+    } else if (source==="pac") {
       axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2021-091522.txt').then(function(response) {
       const text = response.data;
 
