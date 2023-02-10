@@ -273,7 +273,8 @@ class Entry {
 }
 class Util {
   constructor() { }
-  download(filename) {
+  download(filename,type) {
+    if (type=="natl") {
     axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2021-100522.txt').then(function(response) {
       const text = response.data;
 
@@ -283,6 +284,19 @@ class Util {
         }
       });
     });
+    } else if (type=="pac") {
+      axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2021-091522.txt').then(function(response) {
+      const text = response.data;
+
+      fs.writeFile(filename, text, function(err) {
+        if (err) {
+          throw new Error("Error saving file")
+        }
+      });
+    });
+    } else {
+      throw new Error("Invalid data type. Type must be \"natl\" (North Atlantic) or \"pac\" (Eastern and Central Pacific)")
+    }
   }
   ktToMph(kt) {
     if (Number(kt) === kt) {
@@ -332,6 +346,7 @@ class Util {
     } 
     throw new Error("Invalid parameters. minlat, maxlat, minlong, and maxlong need to be of type Number, point needs to be of type Point")
   }
+  
 }
 
 export {
