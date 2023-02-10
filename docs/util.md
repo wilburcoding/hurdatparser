@@ -17,14 +17,14 @@ Initalization of Util class
 const util = new Util();
 ```
 
-## `Util.download(filename, type)`
+## `Util.download(filename, data)`
 
 Download Hurdat2 data from the National Hurricane Center (NHC)
 
 #### Parameters
 
 `filename` - Path of file to download data to
-`type` - Type of data file, "natl" for North Altantic and "pac" for Central and Eastern Pacific data
+`source` - Source of data file, "natl" for North Altantic and "pac" for Central and Eastern Pacific data
 
 #### Example Usage
 
