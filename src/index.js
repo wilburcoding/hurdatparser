@@ -273,8 +273,8 @@ class Entry {
 }
 class Util {
   constructor() { }
-  download(filename,type) {
-    if (type=="natl") {
+  download(filename,source) {
+    if (source=="natl") {
     axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2021-100522.txt').then(function(response) {
       const text = response.data;
 
@@ -284,7 +284,7 @@ class Util {
         }
       });
     });
-    } else if (type=="pac") {
+    } else if (source=="pac") {
       axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2021-091522.txt').then(function(response) {
       const text = response.data;
 
@@ -295,7 +295,7 @@ class Util {
       });
     });
     } else {
-      throw new Error("Invalid data type. Type must be \"natl\" (North Atlantic) or \"pac\" (Eastern and Central Pacific)")
+      throw new Error("Invalid data type. Source must be \"natl\" (North Atlantic) or \"pac\" (Eastern and Central Pacific)")
     }
   }
   ktToMph(kt) {
