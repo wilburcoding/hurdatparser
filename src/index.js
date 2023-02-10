@@ -29,19 +29,19 @@ class Hurdat {
     //if (err) throw new Error("Unable to load file");
     var raw = data.split("\n");
     self.storms = []
-    self.stormdata = []
-    self.stormheader = ""
+    var stormdata = []
+    var stormheader = ""
     for (var item of raw) {
-      if (item.substring(0, 2) == "AL") {
+      if (item.substring(0, 2) == "AL" || item.substring(0,2)=="EP" || item.substring(0,2)=="CP") {
         //
-        if (self.stormheader != "") {
-          self.storms.push(new Storm(self.stormheader, self.stormdata))
-          self.stormdata = []
+        if (stormheader != "") {
+          self.storms.push(new Storm(stormheader, stormdata))
+          stormdata = []
         }
-        self.stormheader = item
+        stormheader = item
 
       } else {
-        self.stormdata.push(item)
+        stormdata.push(item)
       }
     }
 
@@ -119,24 +119,66 @@ class Hurdat {
             }
           }
           if (Object.keys(query).includes("date")) {
-            if (query["date"] instanceof Date) {
-              matches = matches && (storm.formed.getTime() <= query["date"].getTime() && storm.dissipated.getTime() >= query["date"].getTime())
+            if (query["date"].length==2 && query["date"][0] instanceof Date && query["date"][1] instanceof Date) {
+              //will be fixed
+
+              matches = matches && (query["date"][0].getTime() <=  storm.formed.getTime() && query["date"][1].getTime() >= storm.dissipated.getTime())
             } else {
-              throw new Error("Query value for date must be a date opject")
+              throw new Error("Query values for date must be date opjects")
             }
           }
-          if (Object.keys(query).includes("landfalls")) {
-            if (Number(query["landfalls"]) == query["landfalls"]) {
+          if (Object.keys(query).includes("landfallnum")) {
+            if (Number(query["landfallnum"]) == query["landfallnum"]) {
               //is number
-              matches = matches && storm.landfalls.length == query["landfalls"]
-            } else if (query["landfalls"].constructor === Array) {
-              if (query["landfalls"].length == 2 && query["landfalls"][1] >= query["landfalls"][0]) {
-                matches = matches && (storm.landfalls.length >= query["landfalls"][0] && storm.landfalls.length <= query["landfalls"][1])
+              matches = matches && storm.landfalls.length == query["landfallnum"]
+            } else if (query["landfallnum"].constructor === Array) {
+              if (query["landfallnum"].length == 2 && query["landfallnum"][1] >= query["landfallnum"][0]) {
+                matches = matches && (storm.landfalls.length >= query["landfallnum"][0] && storm.landfalls.length <= query["landfallnum"][1])
               } else {
                 throw new Error("Invalid array range provided. Parameter should be an array with 2 elements of type Number, a minimum and a maximum")
               }
             } else {
-              throw new Error("Query value for landfalls must be Number or an array with 2 elements, a minimum and a maximum")
+              throw new Error("Query value for landfallnum must be Number or an array with 2 elements, a minimum and a maximum")
+            }
+          }
+          if (Object.keys(query).includes("point")) {
+            if (query["point"].constructor === Array) {
+              if (query["point"].length == 4 && query["point"][1] >= query["point"][0] && query["point"][3] >= query["point"][2]) {
+                var isin = false
+                for (var item of storm.entries) {
+                  var point = item.point
+                  if (point.getLat() >= query["point"][0] && point.getLat() <= query["point"][1] && point.getLong() >= query["point"][2] && point.getLong() <= query["point"][3]) {
+                    isin = true;
+                    break
+                  }
+                }
+                matches = matches && isin
+              } else {
+                throw new Error("Query value for point must be an array with 4 elements of type Number, a max latitude, min latitude, a max longitude, and a min longitude")
+              }
+            } else {
+              throw new Error("Query value for point must be an array with 4 elements of type Number, a max latitude, min latitude, a max longitude, and a min longitude")
+            }
+          }
+          if (Object.keys(query).includes("landfall")) {
+            if (query["landfall"].constructor === Array) {
+              if ((query["landfall"].length == 4) && query["landfall"][1] >= query["landfall"][0] && query["landfall"][3] >= query["landfall"][2]) {
+                var isin = false
+                for (var item of storm.entries) {
+                  var point = item.point
+                  if (point.getLat() >= query["landfall"][0] && point.getLat() <= query["landfall"][1] && point.getLong() >= query["landfall"][2] && point.getLong() <= query["landfall"][3] && item.identifier == "L") {
+
+                    isin = true;
+                    break
+
+                  }
+                }
+                matches = matches && isin
+              } else {
+                throw new Error("Query value for landfall must be an array with 4 elements of type Number, a max latitude, min latitude, a max longitude, and a min longitude")
+              }
+            } else {
+              throw new Error("Query value for landfall must be an array with 4 elements of type Number, a max latitude, min latitude, a max longitude, and a min longitude.")
             }
           }
           return matches
@@ -149,9 +191,6 @@ class Hurdat {
       console.log(e)
       throw new Error("Invalid parameter or query")
     }
-  }
-  season(year) {
-    return this.storms.filter((storm) => String(storm.year) === String(year))
   }
 }
 class Storm {
@@ -234,7 +273,8 @@ class Entry {
 }
 class Util {
   constructor() { }
-  download(filename) {
+  download(filename,source) {
+    if (source==="natl") {
     axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2021-100522.txt').then(function(response) {
       const text = response.data;
 
@@ -244,6 +284,19 @@ class Util {
         }
       });
     });
+    } else if (source==="pac") {
+      axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2021-091522.txt').then(function(response) {
+      const text = response.data;
+
+      fs.writeFile(filename, text, function(err) {
+        if (err) {
+          throw new Error("Error saving file")
+        }
+      });
+    });
+    } else {
+      throw new Error("Invalid data type. Source must be \"natl\" (North Atlantic) or \"pac\" (Eastern and Central Pacific)")
+    }
   }
   ktToMph(kt) {
     if (Number(kt) === kt) {
@@ -287,6 +340,13 @@ class Util {
     }
     throw new Error("Invalid Parameter (Parameter needs to be a Point)")
   }
+  inside(minlat,maxlat,minlong,maxlong,point) {
+    if (Number(minlat) == minlat && Number(maxlat) == maxlat && Number(minlong) == minlong && Number(maxlong) == maxlong && point instanceof Point) {
+    return (point.getLat() >= minlat && point.getLat() <= maxlat && point.getLong() >= minlong && point.getLong() <= maxlong)
+    } 
+    throw new Error("Invalid parameters. minlat, maxlat, minlong, and maxlong need to be of type Number, point needs to be of type Point")
+  }
+  
 }
 
 export {

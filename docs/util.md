@@ -17,6 +17,24 @@ Initalization of Util class
 const util = new Util();
 ```
 
+## `Util.download(filename, data)`
+
+Download Hurdat2 data from the National Hurricane Center (NHC)
+
+#### Parameters
+
+`filename` - Path of file to download data to
+`source` - Source of data file, "natl" for North Altantic and "pac" for Central and Eastern Pacific data
+
+#### Example Usage
+
+Download North Altantic Hurdat2 data from the National Hurricane Center (NHC)
+
+```javascript
+util.download("path/to/data.txt", "natl");
+```
+
+
 ## `Util.ktToMph(kt)`
 
 Convert knots to mph
