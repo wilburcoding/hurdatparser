@@ -55,7 +55,7 @@ class Hurdat {
       }
       throw new Error("Parameter must be a function")
     } catch (e) {
-      console.log(e)
+      console.error(e)
       throw new Error("Error filtering items")
     }
   }
@@ -66,9 +66,7 @@ class Hurdat {
           var matches = true;
           if (Object.keys(query).includes("season")) {
             if (Number(query["season"]) == query["season"]) {
-              //is number
               matches = matches && storm.year == query["season"]
-
             } else {
               throw new Error("Query value for season must be number")
             }
@@ -197,10 +195,8 @@ class Hurdat {
                 for (var item of storm.entries) {
                   var point = item.point
                   if (point.getLat() >= query["landfall"][0] && point.getLat() <= query["landfall"][1] && point.getLong() >= query["landfall"][2] && point.getLong() <= query["landfall"][3] && item.identifier == "L") {
-
                     isin = true;
                     break
-
                   }
                 }
                 matches = matches && isin
@@ -232,7 +228,6 @@ class Storm {
       var id = data[0].trim()
       this.id = id
       this.peakwind = null
-
       this.peakpressure = null
       this.number = parseInt(id.substring(2, 4))
       this.year = parseInt(id.substring(4, 9))
@@ -290,26 +285,35 @@ class Entry {
       this.point = new Point((data[4][data[4].length - 1] == "N" ? parseFloat(data[4].substring(0, data[4].length - 1)) : parseFloat(data[4].substring(0, data[4].length - 1)) * -1), (data[5][data[5].length - 1] == "E" ? parseFloat(data[5].substring(0, data[5].length - 1)) : parseFloat(data[5].substring(0, data[5].length - 1)) * -1))
       this.wind = (data[6].trim() != "" ? parseInt(data[6].trim()) : null)
       this.pressure = parseInt(data[7].trim())
+      for (var i = 0; i < data.length; i++) {
+        if (data[i] == -999 || data[i] == -99) {
+          data[i]=null;
+        } else {
+          if (i >= 8 && i <= 20) {
+            data[i]=parseInt(data[i])
+          }
+        }
+      }
       this.radius = {
         "34": {
-          "NE": (data[8].trim() != "-999" ? parseInt(data[8].trim()) : null),
-          "SE": (data[9].trim() != "-999" ? parseInt(data[9].trim()) : null),
-          "SW": (data[10].trim() != "-999" ? parseInt(data[10].trim()) : null),
-          "NW": (data[11].trim() != "-999" ? parseInt(data[11].trim()) : null)
+          "NE": data[8],
+          "SE": data[9],
+          "SW": data[10],
+          "NW": data[11]
         },
         "50": {
-          "NE": (data[12].trim() != "-999" ? parseInt(data[12].trim()) : null),
-          "SE": (data[13].trim() != "-999" ? parseInt(data[13].trim()) : null),
-          "SW": (data[14].trim() != "-999" ? parseInt(data[14].trim()) : null),
-          "NW": (data[15].trim() != "-999" ? parseInt(data[15].trim()) : null)
+          "NE": data[12],
+          "SE": data[13],
+          "SW": data[14],
+          "NW": data[15]
         },
         "64": {
-          "NE": (data[16].trim() != "-999" ? parseInt(data[16].trim()) : null),
-          "SE": (data[17].trim() != "-999" ? parseInt(data[17].trim()) : null),
-          "SW": (data[18].trim() != "-999" ? parseInt(data[18].trim()) : null),
-          "NW": (data[19].trim() != "-999" ? parseInt(data[19].trim()) : null)
+          "NE": data[16],
+          "SE": data[17],
+          "SW": data[18],
+          "NW": data[19]
         },
-        "max": parseInt(data[20].trim())
+        "max": data[20]
       }
     } catch (e) {
       console.log(e)
