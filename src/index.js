@@ -220,9 +220,26 @@ class Storm {
           this.peakpressure = lastentry
         }
       }
+
       this.formed = this.entries[0].date
       this.dissipated = this.entries[this.entries.length - 1].date
+      var distkm = 0;
+      var distmi = 0;
 
+      for (var i = 0; i < this.entries.length - 1; i++) {
+        var radlat1 = Math.PI * this.entries[i].point.getLat() / 180;
+        var radlat2 = Math.PI * this.entries[i+1].point.getLat() / 180;
+        var theta = this.entries[i].point.getLong() - this.entries[i+1].point.getLong()
+        var radtheta = Math.PI * theta / 180
+        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        dist = Math.acos(dist) * 180 / Math.PI * 60 * 1.1515
+        distkm+=dist * 1.609344 
+        distmi+=dist * 0.8684 
+      }
+      this.distance = {
+        "mi":distmi,
+        "km":distkm
+      }
     } catch (e) {
       console.log(e)
       throw new Error("An error record while parsing storm data")
@@ -346,7 +363,7 @@ class Util {
     }
     throw new Error("Invalid parameters. minlat, maxlat, minlong, and maxlong need to be of type Number, point needs to be of type Point")
   }
-  coordDist(point1, point2, unit="km") {
+  coordDist(point1, point2, unit = "km") {
     //uses haversine formula
     //https://www.htmlgoodies.com/javascript/calculate-the-distance-between-two-points-in-your-web-apps/
     //https://stackoverflow.com/questions/18883601/function-to-calculate-distance-between-two-coordinates
