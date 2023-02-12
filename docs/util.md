@@ -55,6 +55,32 @@ Convert 50 kt to mph
 util.ktToMph(50);
 ```
 
+## `Util.coordDist(point1, point2, unit)`
+
+Get distance between 2 coordinates
+
+#### Parameters
+
+`point1` - First point to calculate distance between
+`point2` - Second point to calculate distance between
+`unit` (Optional) - Specify unit for result. km" for kilometers and "mi" for miles. Default value is "km"
+
+#### Returns
+
+Distance between provided coordinates
+
+#### Example usage
+
+Calculate the distance between (59, 14) and (60, 14) in miles
+```javascript
+console.log(util.coordDist(new Point(59, 13), new Point(60, 14), "mi"))
+```
+
+Calculate the distance between (58, 5) and (59, 8) in kilometers
+```javascript
+console.log(util.coordDist(new Point(58, 5), new Point(59, 8)))
+```
+
 ## `Util.ktToKph(kt)`
 
 Convert knots to kph
