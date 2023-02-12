@@ -89,11 +89,17 @@ hurdat.filter({"season" : "2005","landfallnum" : [3, 5]});
 Find storms that made landfall on Long Island before 1950
 
 ```javascript
-hurdat.filter({"date" : [new Date(1800, 1, 1), new Date(1950, 1, 1)], "landfall" : [40.54, 41.21, -71.75, -74.18]});
+hurdat.filter({"date" : [new Date(1800, 0, 1), new Date(1950, 0, 1)], "landfall" : [40.54, 41.21, -71.75, -74.18]});
 ```
 
 Find storms that made at least `5` landfalls and no more than `10` landfalls that had a peak intensity of `80` to `100` knots
 
 ```javascript
 hurdat.filter({"peakwind": [80, 100], "landfallnum": [5, 10]})
+```
+
+Find storms that have a track distance of at least 2,500 miles and less than or equal to 10,000 miles after 2000
+
+```javascript
+hurdat.filter({"distancemi": [2500, 10000], "date": [new Date(2000, 0, 1), new Date(2500, 0, 1)]})
 ```
