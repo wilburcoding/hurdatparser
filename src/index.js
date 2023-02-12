@@ -2,7 +2,6 @@ import axios from 'axios';
 import * as fs from 'fs';
 class Point {
   constructor(lat, long) {
-
     if (lat < -90 || lat > 90 || Number(lat) != lat) {
       throw new Error("Parameter latitude must be a Number in range -90 and 90")
     }
@@ -24,28 +23,30 @@ class Point {
 }
 class Hurdat {
   constructor(filename) {
-    var self = this
-    var data = fs.readFileSync(filename, 'utf8')
-    //if (err) throw new Error("Unable to load file");
-    var raw = data.split("\n");
-    self.storms = []
-    var stormdata = []
-    var stormheader = ""
-    for (var item of raw) {
-      if (item.substring(0, 2) == "AL" || item.substring(0, 2) == "EP" || item.substring(0, 2) == "CP") {
-        //
-        if (stormheader != "") {
-          self.storms.push(new Storm(stormheader, stormdata))
-          stormdata = []
+    try {
+      var self = this
+      var data = fs.readFileSync(filename, 'utf8')
+      var raw = data.split("\n");
+      self.storms = []
+      var stormdata = []
+      var stormheader = ""
+      for (var item of raw) {
+        if (item.substring(0, 2) == "AL" || item.substring(0, 2) == "EP" || item.substring(0, 2) == "CP") {
+          if (stormheader != "") {
+            self.storms.push(new Storm(stormheader, stormdata))
+            stormdata = []
+          }
+          stormheader = item
+
+        } else {
+          stormdata.push(item)
         }
-        stormheader = item
-
-      } else {
-        stormdata.push(item)
       }
+    } catch (e) {
+      // Catch error
+      console.error(e)
+      throw new Error("Unable to parse data file. File may be invalid")
     }
-
-
   }
   funcFilter(func) {
     try {
@@ -257,17 +258,17 @@ class Storm {
 
       for (var i = 0; i < this.entries.length - 1; i++) {
         var radlat1 = Math.PI * this.entries[i].point.getLat() / 180;
-        var radlat2 = Math.PI * this.entries[i+1].point.getLat() / 180;
-        var theta = this.entries[i].point.getLong() - this.entries[i+1].point.getLong()
+        var radlat2 = Math.PI * this.entries[i + 1].point.getLat() / 180;
+        var theta = this.entries[i].point.getLong() - this.entries[i + 1].point.getLong()
         var radtheta = Math.PI * theta / 180
         var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
         dist = Math.acos(dist) * 180 / Math.PI * 60 * 1.1515
-        distkm+=dist * 1.609344 
-        distmi+=dist * 0.8684 
+        distkm += dist * 1.609344
+        distmi += dist * 0.8684
       }
       this.distance = {
-        mi:distmi,
-        km:distkm
+        mi: distmi,
+        km: distkm
       }
     } catch (e) {
       console.log(e)
