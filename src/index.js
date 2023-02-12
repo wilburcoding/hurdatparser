@@ -141,6 +141,35 @@ class Hurdat {
               throw new Error("Query value for landfallnum must be Number or an array with 2 elements, a minimum and a maximum")
             }
           }
+          if (Object.keys(query).includes("distancekm")) {
+            if (Number(query["distancekm"]) == query["distancekm"]) {
+              //is number
+              matches = matches && storm.distance.km == query["distancekm"]
+            } else if (query["distancekm"].constructor === Array) {
+              if (query["distancekm"].length == 2 && query["distancekm"][1] >= query["distancekm"][0]) {
+                matches = matches && (storm.distance.km >= query["distancekm"][0] && storm.distance.km <= query["distancekm"][1])
+              } else {
+                throw new Error("Invalid array range provided. Parameter should be an array with 2 elements of type Number, a minimum and a maximum")
+              }
+            } else {
+              throw new Error("Query value for distancekm must be Number or an array with 2 elements, a minimum and a maximum")
+            }
+          }
+          //merge with distancekm possible in future
+          if (Object.keys(query).includes("distancemi")) {
+            if (Number(query["distancemi"]) == query["distancemi"]) {
+              //is number
+              matches = matches && storm.distance.mi == query["distancemi"]
+            } else if (query["distancemi"].constructor === Array) {
+              if (query["distancemi"].length == 2 && query["distancemi"][1] >= query["distancemi"][0]) {
+                matches = matches && (storm.distance.mi >= query["distancemi"][0] && storm.distance.mi <= query["distancemi"][1])
+              } else {
+                throw new Error("Invalid array range provided. Parameter should be an array with 2 elements of type Number, a minimum and a maximum")
+              }
+            } else {
+              throw new Error("Query value for distancemi must be Number or an array with 2 elements, a minimum and a maximum")
+            }
+          }
           if (Object.keys(query).includes("point")) {
             if (query["point"].constructor === Array) {
               if (query["point"].length == 4 && query["point"][1] >= query["point"][0] && query["point"][3] >= query["point"][2]) {
@@ -237,8 +266,8 @@ class Storm {
         distmi+=dist * 0.8684 
       }
       this.distance = {
-        "mi":distmi,
-        "km":distkm
+        mi:distmi,
+        km:distkm
       }
     } catch (e) {
       console.log(e)
