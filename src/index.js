@@ -32,7 +32,7 @@ class Hurdat {
     var stormdata = []
     var stormheader = ""
     for (var item of raw) {
-      if (item.substring(0, 2) == "AL" || item.substring(0,2)=="EP" || item.substring(0,2)=="CP") {
+      if (item.substring(0, 2) == "AL" || item.substring(0, 2) == "EP" || item.substring(0, 2) == "CP") {
         //
         if (stormheader != "") {
           self.storms.push(new Storm(stormheader, stormdata))
@@ -119,10 +119,10 @@ class Hurdat {
             }
           }
           if (Object.keys(query).includes("date")) {
-            if (query["date"].length==2 && query["date"][0] instanceof Date && query["date"][1] instanceof Date) {
+            if (query["date"].length == 2 && query["date"][0] instanceof Date && query["date"][1] instanceof Date) {
               //will be fixed
 
-              matches = matches && (query["date"][0].getTime() <=  storm.formed.getTime() && query["date"][1].getTime() >= storm.dissipated.getTime())
+              matches = matches && (query["date"][0].getTime() <= storm.formed.getTime() && query["date"][1].getTime() >= storm.dissipated.getTime())
             } else {
               throw new Error("Query values for date must be date opjects")
             }
@@ -273,27 +273,27 @@ class Entry {
 }
 class Util {
   constructor() { }
-  download(filename,source) {
-    if (source==="natl") {
-    axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2021-100522.txt').then(function(response) {
-      const text = response.data;
+  download(filename, source) {
+    if (source === "natl") {
+      axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2021-100522.txt').then(function(response) {
+        const text = response.data;
 
-      fs.writeFile(filename, text, function(err) {
-        if (err) {
-          throw new Error("Error saving file")
-        }
+        fs.writeFile(filename, text, function(err) {
+          if (err) {
+            throw new Error("Error saving file")
+          }
+        });
       });
-    });
-    } else if (source==="pac") {
+    } else if (source === "pac") {
       axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2021-091522.txt').then(function(response) {
-      const text = response.data;
+        const text = response.data;
 
-      fs.writeFile(filename, text, function(err) {
-        if (err) {
-          throw new Error("Error saving file")
-        }
+        fs.writeFile(filename, text, function(err) {
+          if (err) {
+            throw new Error("Error saving file")
+          }
+        });
       });
-    });
     } else {
       throw new Error("Invalid data type. Source must be \"natl\" (North Atlantic) or \"pac\" (Eastern and Central Pacific)")
     }
@@ -340,13 +340,28 @@ class Util {
     }
     throw new Error("Invalid Parameter (Parameter needs to be a Point)")
   }
-  inside(minlat,maxlat,minlong,maxlong,point) {
+  inside(minlat, maxlat, minlong, maxlong, point) {
     if (Number(minlat) == minlat && Number(maxlat) == maxlat && Number(minlong) == minlong && Number(maxlong) == maxlong && point instanceof Point) {
-    return (point.getLat() >= minlat && point.getLat() <= maxlat && point.getLong() >= minlong && point.getLong() <= maxlong)
-    } 
+      return (point.getLat() >= minlat && point.getLat() <= maxlat && point.getLong() >= minlong && point.getLong() <= maxlong)
+    }
     throw new Error("Invalid parameters. minlat, maxlat, minlong, and maxlong need to be of type Number, point needs to be of type Point")
   }
-  
+  coordDist(point1, point2, unit="km") {
+    //uses haversine formula
+    //https://www.htmlgoodies.com/javascript/calculate-the-distance-between-two-points-in-your-web-apps/
+    //https://stackoverflow.com/questions/18883601/function-to-calculate-distance-between-two-coordinates
+    var radlat1 = Math.PI * point1.getLat() / 180;
+    var radlat2 = Math.PI * point2.getLat() / 180;
+    var theta = point1.getLong() - point2.getLong()
+    var radtheta = Math.PI * theta / 180
+    var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+    dist = Math.acos(dist) * 180 / Math.PI * 60 * 1.1515
+    if (unit == "km") { dist = dist * 1.609344 }
+    if (unit == "mi") { dist = dist * 0.8684 }
+    return dist
+
+  }
+
 }
 
 export {
