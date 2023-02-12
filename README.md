@@ -6,6 +6,10 @@ This package can be installed using a simple `npm install` command
 ```
 npm install hurdatparser
 ```
+You can import it into your project using `import`
+```
+import { Hurdat, Util, Point } from "hurdatparser"
+```
 ## [Documentation](https://github.com/wilburcoding/hurdatparser/tree/main/docs)
 
 # Contributing
