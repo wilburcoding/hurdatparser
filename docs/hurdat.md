@@ -79,6 +79,6 @@ Example usage of using a function to filter storms with the name Henri
 
 ```javascript
 hurdat.filter(function(storm) {
-  return storm.name == "Henri"
+  return storm.name == "HENRI";
 })
 ```
