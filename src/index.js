@@ -31,7 +31,7 @@ class Hurdat {
       var stormdata = []
       var stormheader = ""
       for (var item of raw) {
-        if (item.substring(0, 2) == "AL" || item.substring(0, 2) == "EP" || item.substring(0, 2) == "CP") {
+        if (item.split(",").length < 4) {
           if (stormheader != "") {
             self.storms.push(new Storm(stormheader, stormdata))
             stormdata = []
@@ -42,7 +42,6 @@ class Hurdat {
         }
       }
     } catch (e) {
-      // Catch error
       console.error(e)
       throw new Error("Unable to parse data file. File may be invalid")
     }
