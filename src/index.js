@@ -20,6 +20,18 @@ class Point {
   getCoord() {
     return [this.lat, this.long]
   }
+  setLat(newlat) {
+    if (newlat < -90 || newlat > 90 || Number(newlat) != newlat) {
+      throw new Error("Parameter latitude must be a Number in range -90 and 90")
+    }
+    this.lat = newlat;
+  }
+  setLong(newlong) {
+    if (newlong < -180 || newlong > 180 || Number(newlong) != newlong) {
+      throw new Error("Parameter latitude must be a Number in range -90 and 90")
+    }
+    this.long = newlong;
+  }
 }
 class Hurdat {
   constructor(filename) {
