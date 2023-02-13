@@ -22,36 +22,6 @@ Initalize and load Hurdat2 data
 const hurdat = new Hurdat("path/to/data.txt");
 ```
 
-## `Hurdat.funcFilter(func)`
-
-A method to filter storms using the passed function
-
-#### Parameters
-
-`func` - Function used to filter storms 
-
-#### Returns
-
-Array of `Storm` filtered 
-
-#### Example Usage
-
-Finds storms named "Henri"
-
-```javascript
-hurdat.funcFilter(function(storm) {
-  return storm.name == "Henri";
-});
-```
-
-Find storms with forming in July
-
-```javascript
-hurdat.funcFilter(function(storm) {
-  return storm.formed.getMonth() == 6;
-});
-```
-
 ## `Hurdat.filter(query)`
 
 A method to quickly query for storms
@@ -59,7 +29,8 @@ A method to quickly query for storms
 #### Parameters
 
 
-`query` - An object containing different conditions to query for
+`query` - An function with one parameter to filter items or an object containing different conditions to query for
+#### Query object fields
 **Note**: All `query` parameters are optional
 - `season` (Number) - Look for storms in a certain year
 - `namematch` (Regular expression) - Look for storms with names matching a certain regular expression
@@ -102,4 +73,12 @@ Find storms that have a track distance of at least 2,500 miles and less than or 
 
 ```javascript
 hurdat.filter({"distancemi": [2500, 10000], "date": [new Date(2000, 0, 1), new Date(2500, 0, 1)]})
+```
+
+Example usage of using a function to filter storms with the name Henri
+
+```javascript
+hurdat.filter(function(storm) {
+  return storm.name == "Henri"
+})
 ```
