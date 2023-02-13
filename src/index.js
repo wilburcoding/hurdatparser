@@ -43,7 +43,7 @@ class Hurdat {
       var stormdata = []
       var stormheader = ""
       for (var item of raw) {
-        if (item.split(",").length < 4) {
+        if (item.split(",").length < 8) {
           if (stormheader != "") {
             self.storms.push(new Storm(stormheader, stormdata))
             stormdata = []
@@ -209,8 +209,8 @@ class Hurdat {
           return matches
         })
 
-      } else if (func instanceof Function) {
-        return this.storms.filter((storm) => func(storm))
+      } else if (query instanceof Function) {
+        return this.storms.filter((storm) => query(storm))
       } else {
         throw new Error("Filter must be a function or object with query fields")
       }
