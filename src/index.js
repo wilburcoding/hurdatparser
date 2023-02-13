@@ -37,7 +37,6 @@ class Hurdat {
             stormdata = []
           }
           stormheader = item
-
         } else {
           stormdata.push(item)
         }
@@ -214,7 +213,7 @@ class Hurdat {
         throw new Error("Parameter must be of type dictionary")
       }
     } catch (e) {
-      console.log(e)
+      console.error(e);
       throw new Error("Invalid parameter or query")
     }
   }
@@ -266,7 +265,7 @@ class Storm {
         km: distkm
       }
     } catch (e) {
-      console.log(e)
+      console.error(e)
       throw new Error("An error record while parsing storm data")
     }
   }
@@ -316,7 +315,7 @@ class Entry {
         "max": data[20]
       }
     } catch (e) {
-      console.log(e)
+      console.error(e)
       throw new Error("An error record while parsing entry data")
     }
   }
@@ -410,11 +409,8 @@ class Util {
     if (unit == "km") { dist = dist * 1.609344 }
     if (unit == "mi") { dist = dist * 0.8684 }
     return dist
-
   }
-
 }
-
 export {
   Hurdat,
   Util,
