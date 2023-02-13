@@ -58,17 +58,6 @@ class Hurdat {
       throw new Error("Unable to parse data file. File may be invalid")
     }
   }
-  funcFilter(func) {
-    try {
-      if (func instanceof Function) {
-        return this.storms.filter((storm) => func(storm))
-      }
-      throw new Error("Parameter must be a function")
-    } catch (e) {
-      console.error(e)
-      throw new Error("Error filtering items")
-    }
-  }
   filter(query) {
     try {
       if (query.constructor == Object) {
@@ -220,8 +209,10 @@ class Hurdat {
           return matches
         })
 
+      } else if (func instanceof Function) {
+        return this.storms.filter((storm) => func(storm))
       } else {
-        throw new Error("Parameter must be of type dictionary")
+        throw new Error("Filter must be a function or object with query fields")
       }
     } catch (e) {
       console.error(e);
