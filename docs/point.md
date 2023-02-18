@@ -48,3 +48,34 @@ Get latitude value for Point
 point.getLat();
 ```
 
+## `Util.setLat(newlat)`
+
+Set latitude value for Point
+
+#### Parameters
+
+`newlat` - new latitude value
+
+#### Example Usage
+
+Set latitude value for Point to 40
+
+```javascript
+point.setLat(40);
+```
+
+## `Util.setLong(newlong)`
+
+Set longtiude value for Point
+
+#### Parameters
+
+`newlong` - new latitude value
+
+#### Example Usage
+
+Set longitude value for Point to 57
+
+```javascript
+point.setLong(57);
+```

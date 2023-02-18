@@ -2,7 +2,6 @@ import axios from 'axios';
 import * as fs from 'fs';
 class Point {
   constructor(lat, long) {
-
     if (lat < -90 || lat > 90 || Number(lat) != lat) {
       throw new Error("Parameter latitude must be a Number in range -90 and 90")
     }
@@ -21,41 +20,42 @@ class Point {
   getCoord() {
     return [this.lat, this.long]
   }
+  setLat(newlat) {
+    if (newlat < -90 || newlat > 90 || Number(newlat) != newlat) {
+      throw new Error("Parameter latitude must be a Number in range -90 and 90")
+    }
+    this.lat = newlat;
+  }
+  setLong(newlong) {
+    if (newlong < -180 || newlong > 180 || Number(newlong) != newlong) {
+      throw new Error("Parameter latitude must be a Number in range -90 and 90")
+    }
+    this.long = newlong;
+  }
 }
 class Hurdat {
   constructor(filename) {
-    var self = this
-    var data = fs.readFileSync(filename, 'utf8')
-    //if (err) throw new Error("Unable to load file");
-    var raw = data.split("\n");
-    self.storms = []
-    var stormdata = []
-    var stormheader = ""
-    for (var item of raw) {
-      if (item.substring(0, 2) == "AL" || item.substring(0,2)=="EP" || item.substring(0,2)=="CP") {
-        //
-        if (stormheader != "") {
-          self.storms.push(new Storm(stormheader, stormdata))
-          stormdata = []
-        }
-        stormheader = item
-
-      } else {
-        stormdata.push(item)
-      }
-    }
-
-
-  }
-  funcFilter(func) {
     try {
-      if (func instanceof Function) {
-        return this.storms.filter((storm) => func(storm))
+      var self = this
+      var data = fs.readFileSync(filename, 'utf8')
+      var raw = data.split("\n");
+      self.storms = []
+      var stormdata = []
+      var stormheader = ""
+      for (var item of raw) {
+        if (item.split(",").length < 8) {
+          if (stormheader != "") {
+            self.storms.push(new Storm(stormheader, stormdata))
+            stormdata = []
+          }
+          stormheader = item
+        } else {
+          stormdata.push(item)
+        }
       }
-      throw new Error("Parameter must be a function")
     } catch (e) {
-      console.log(e)
-      throw new Error("Error filtering items")
+      console.error(e)
+      throw new Error("Unable to parse data file. File may be invalid")
     }
   }
   filter(query) {
@@ -65,9 +65,7 @@ class Hurdat {
           var matches = true;
           if (Object.keys(query).includes("season")) {
             if (Number(query["season"]) == query["season"]) {
-              //is number
               matches = matches && storm.year == query["season"]
-
             } else {
               throw new Error("Query value for season must be number")
             }
@@ -119,10 +117,10 @@ class Hurdat {
             }
           }
           if (Object.keys(query).includes("date")) {
-            if (query["date"].length==2 && query["date"][0] instanceof Date && query["date"][1] instanceof Date) {
+            if (query["date"].length == 2 && query["date"][0] instanceof Date && query["date"][1] instanceof Date) {
               //will be fixed
 
-              matches = matches && (query["date"][0].getTime() <=  storm.formed.getTime() && query["date"][1].getTime() >= storm.dissipated.getTime())
+              matches = matches && (query["date"][0].getTime() <= storm.formed.getTime() && query["date"][1].getTime() >= storm.dissipated.getTime())
             } else {
               throw new Error("Query values for date must be date opjects")
             }
@@ -139,6 +137,35 @@ class Hurdat {
               }
             } else {
               throw new Error("Query value for landfallnum must be Number or an array with 2 elements, a minimum and a maximum")
+            }
+          }
+          if (Object.keys(query).includes("distancekm")) {
+            if (Number(query["distancekm"]) == query["distancekm"]) {
+              //is number
+              matches = matches && storm.distance.km == query["distancekm"]
+            } else if (query["distancekm"].constructor === Array) {
+              if (query["distancekm"].length == 2 && query["distancekm"][1] >= query["distancekm"][0]) {
+                matches = matches && (storm.distance.km >= query["distancekm"][0] && storm.distance.km <= query["distancekm"][1])
+              } else {
+                throw new Error("Invalid array range provided. Parameter should be an array with 2 elements of type Number, a minimum and a maximum")
+              }
+            } else {
+              throw new Error("Query value for distancekm must be Number or an array with 2 elements, a minimum and a maximum")
+            }
+          }
+          //merge with distancekm possible in future
+          if (Object.keys(query).includes("distancemi")) {
+            if (Number(query["distancemi"]) == query["distancemi"]) {
+              //is number
+              matches = matches && storm.distance.mi == query["distancemi"]
+            } else if (query["distancemi"].constructor === Array) {
+              if (query["distancemi"].length == 2 && query["distancemi"][1] >= query["distancemi"][0]) {
+                matches = matches && (storm.distance.mi >= query["distancemi"][0] && storm.distance.mi <= query["distancemi"][1])
+              } else {
+                throw new Error("Invalid array range provided. Parameter should be an array with 2 elements of type Number, a minimum and a maximum")
+              }
+            } else {
+              throw new Error("Query value for distancemi must be Number or an array with 2 elements, a minimum and a maximum")
             }
           }
           if (Object.keys(query).includes("point")) {
@@ -167,10 +194,8 @@ class Hurdat {
                 for (var item of storm.entries) {
                   var point = item.point
                   if (point.getLat() >= query["landfall"][0] && point.getLat() <= query["landfall"][1] && point.getLong() >= query["landfall"][2] && point.getLong() <= query["landfall"][3] && item.identifier == "L") {
-
                     isin = true;
                     break
-
                   }
                 }
                 matches = matches && isin
@@ -184,11 +209,13 @@ class Hurdat {
           return matches
         })
 
+      } else if (query instanceof Function) {
+        return this.storms.filter((storm) => query(storm))
       } else {
-        throw new Error("Parameter must be of type dictionary")
+        throw new Error("Filter must be a function or object with query fields")
       }
     } catch (e) {
-      console.log(e)
+      console.error(e);
       throw new Error("Invalid parameter or query")
     }
   }
@@ -202,7 +229,6 @@ class Storm {
       var id = data[0].trim()
       this.id = id
       this.peakwind = null
-
       this.peakpressure = null
       this.number = parseInt(id.substring(2, 4))
       this.year = parseInt(id.substring(4, 9))
@@ -220,11 +246,28 @@ class Storm {
           this.peakpressure = lastentry
         }
       }
+
       this.formed = this.entries[0].date
       this.dissipated = this.entries[this.entries.length - 1].date
+      var distkm = 0;
+      var distmi = 0;
 
+      for (var i = 0; i < this.entries.length - 1; i++) {
+        var radlat1 = Math.PI * this.entries[i].point.getLat() / 180;
+        var radlat2 = Math.PI * this.entries[i + 1].point.getLat() / 180;
+        var theta = this.entries[i].point.getLong() - this.entries[i + 1].point.getLong()
+        var radtheta = Math.PI * theta / 180
+        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        dist = Math.acos(dist) * 180 / Math.PI * 60 * 1.1515
+        distkm += dist * 1.609344
+        distmi += dist * 0.8684
+      }
+      this.distance = {
+        mi: distmi,
+        km: distkm
+      }
     } catch (e) {
-      console.log(e)
+      console.error(e)
       throw new Error("An error record while parsing storm data")
     }
   }
@@ -243,29 +286,38 @@ class Entry {
       this.point = new Point((data[4][data[4].length - 1] == "N" ? parseFloat(data[4].substring(0, data[4].length - 1)) : parseFloat(data[4].substring(0, data[4].length - 1)) * -1), (data[5][data[5].length - 1] == "E" ? parseFloat(data[5].substring(0, data[5].length - 1)) : parseFloat(data[5].substring(0, data[5].length - 1)) * -1))
       this.wind = (data[6].trim() != "" ? parseInt(data[6].trim()) : null)
       this.pressure = parseInt(data[7].trim())
+      for (var i = 0; i < data.length; i++) {
+        if (data[i] == -999 || data[i] == -99) {
+          data[i]=null;
+        } else {
+          if (i >= 8 && i <= 20) {
+            data[i]=parseInt(data[i])
+          }
+        }
+      }
       this.radius = {
         "34": {
-          "NE": (data[8].trim() != "-999" ? parseInt(data[8].trim()) : null),
-          "SE": (data[9].trim() != "-999" ? parseInt(data[9].trim()) : null),
-          "SW": (data[10].trim() != "-999" ? parseInt(data[10].trim()) : null),
-          "NW": (data[11].trim() != "-999" ? parseInt(data[11].trim()) : null)
+          "NE": data[8],
+          "SE": data[9],
+          "SW": data[10],
+          "NW": data[11]
         },
         "50": {
-          "NE": (data[12].trim() != "-999" ? parseInt(data[12].trim()) : null),
-          "SE": (data[13].trim() != "-999" ? parseInt(data[13].trim()) : null),
-          "SW": (data[14].trim() != "-999" ? parseInt(data[14].trim()) : null),
-          "NW": (data[15].trim() != "-999" ? parseInt(data[15].trim()) : null)
+          "NE": data[12],
+          "SE": data[13],
+          "SW": data[14],
+          "NW": data[15]
         },
         "64": {
-          "NE": (data[16].trim() != "-999" ? parseInt(data[16].trim()) : null),
-          "SE": (data[17].trim() != "-999" ? parseInt(data[17].trim()) : null),
-          "SW": (data[18].trim() != "-999" ? parseInt(data[18].trim()) : null),
-          "NW": (data[19].trim() != "-999" ? parseInt(data[19].trim()) : null)
+          "NE": data[16],
+          "SE": data[17],
+          "SW": data[18],
+          "NW": data[19]
         },
-        "max": parseInt(data[20].trim())
+        "max": data[20]
       }
     } catch (e) {
-      console.log(e)
+      console.error(e)
       throw new Error("An error record while parsing entry data")
     }
   }
@@ -273,27 +325,27 @@ class Entry {
 }
 class Util {
   constructor() { }
-  download(filename,source) {
-    if (source==="natl") {
-    axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2021-100522.txt').then(function(response) {
-      const text = response.data;
+  download(filename, source) {
+    if (source === "natl") {
+      axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2021-100522.txt').then(function(response) {
+        const text = response.data;
 
-      fs.writeFile(filename, text, function(err) {
-        if (err) {
-          throw new Error("Error saving file")
-        }
+        fs.writeFile(filename, text, function(err) {
+          if (err) {
+            throw new Error("Error saving file")
+          }
+        });
       });
-    });
-    } else if (source==="pac") {
+    } else if (source === "pac") {
       axios.get('https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2021-091522.txt').then(function(response) {
-      const text = response.data;
+        const text = response.data;
 
-      fs.writeFile(filename, text, function(err) {
-        if (err) {
-          throw new Error("Error saving file")
-        }
+        fs.writeFile(filename, text, function(err) {
+          if (err) {
+            throw new Error("Error saving file")
+          }
+        });
       });
-    });
     } else {
       throw new Error("Invalid data type. Source must be \"natl\" (North Atlantic) or \"pac\" (Eastern and Central Pacific)")
     }
@@ -340,15 +392,27 @@ class Util {
     }
     throw new Error("Invalid Parameter (Parameter needs to be a Point)")
   }
-  inside(minlat,maxlat,minlong,maxlong,point) {
+  inside(minlat, maxlat, minlong, maxlong, point) {
     if (Number(minlat) == minlat && Number(maxlat) == maxlat && Number(minlong) == minlong && Number(maxlong) == maxlong && point instanceof Point) {
-    return (point.getLat() >= minlat && point.getLat() <= maxlat && point.getLong() >= minlong && point.getLong() <= maxlong)
-    } 
+      return (point.getLat() >= minlat && point.getLat() <= maxlat && point.getLong() >= minlong && point.getLong() <= maxlong)
+    }
     throw new Error("Invalid parameters. minlat, maxlat, minlong, and maxlong need to be of type Number, point needs to be of type Point")
   }
-  
+  coordDist(point1, point2, unit = "km") {
+    //uses haversine formula
+    //https://www.htmlgoodies.com/javascript/calculate-the-distance-between-two-points-in-your-web-apps/
+    //https://stackoverflow.com/questions/18883601/function-to-calculate-distance-between-two-coordinates
+    var radlat1 = Math.PI * point1.getLat() / 180;
+    var radlat2 = Math.PI * point2.getLat() / 180;
+    var theta = point1.getLong() - point2.getLong()
+    var radtheta = Math.PI * theta / 180
+    var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+    dist = Math.acos(dist) * 180 / Math.PI * 60 * 1.1515
+    if (unit == "km") { dist = dist * 1.609344 }
+    if (unit == "mi") { dist = dist * 0.8684 }
+    return dist
+  }
 }
-
 export {
   Hurdat,
   Util,
