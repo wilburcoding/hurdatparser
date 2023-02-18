@@ -1,2 +1,5 @@
-- [ ] Add support for multiple basins
+- [x] Add support for multiple basins
+- [ ] Add JTWC data support
+- [ ] PAGASA data support
+- [ ] Add SPC storm report data?
 - [ ] Proofread docs and create examples
